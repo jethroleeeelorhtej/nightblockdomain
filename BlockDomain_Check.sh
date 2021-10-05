@@ -75,6 +75,21 @@ for apiname in `cat $var/api_list.txt |awk '{print $1}'`; do
                 echo -ne "$apiname $namee \n" >> $log/iperror_$now.txt
             fi
     done
+
+    # 檢查有抗封鎖 & 抗封鎖目標網址 TAG的域名，是否為公司管
+    cat $log/domainall_${apiname}_${now}.txt |grep -w "抗封鎖" > $log/grep3_${apiname}_${now}.txt
+    cat $log/domainall_${apiname}_${now}.txt |grep -w "抗封鎖目標網址" >> $log/grep3_${apiname}_${now}.txt
+    for nameee in `cat $log/grep3_${apiname}_${now}.txt |awk '{print $2}'`; do
+        permissioncheck=`cat $log/grep3_${apiname}_${now}.txt |grep -w $nameee |awk '{print $3}'`
+            if [[ "${permissioncheck}" == "公司管" ]]; then
+                echo -ne "$apiname $nameee \033[32m網址上層為公司管\033[0m \n"
+                echo -ne "$apiname $nameee \n" >> $log/permissionok_$now.txt
+            else
+                echo -ne "$apiname $nameee \033[31m網址上層已被指走\033[0m\n"
+                echo -ne "$apiname $nameee \n" >> $log/permissionerror_$now.txt
+            fi
+    done
+
 done
 
 echo -ne "\n"
@@ -96,6 +111,7 @@ echo -ne "\n"
 echo -ne "\n"
 echo -ne "\n"
 echo -ne "\n"
-echo -ne "\033[33m==========\033[0m 需ON上抗封鎖之網址，檔案請查看 $log/listerror_$now.txt   若無檔案代表皆正常               \033[33m==========\033[0m\n"
-echo -ne "\033[33m==========\033[0m 有ON上抗封鎖TAG，但@紀錄不是抗封鎖IP，檔案請查看 $log/iperror_$now.txt 若無檔案代表皆正常 \033[33m==========\033[0m\n"
-
+echo -ne "\033[33m==========\033[0m 租網有ON上抗封鎖TAG之網址清單，檔案請查看 $log/listok_$now.txt                                             \033[33m==========\033[0m\n"
+echo -ne "\033[33m==========\033[0m 需ON上抗封鎖之網址，檔案請查看 $log/listerror_$now.txt        若無檔案代表皆正常                           \033[33m==========\033[0m\n"
+echo -ne "\033[33m==========\033[0m 有ON上抗封鎖TAG，但@紀錄不是抗封鎖IP，檔案請查看 $log/iperror_$now.txt       若無檔案代表皆正常            \033[33m==========\033[0m\n"
+echo -ne "\033[33m==========\033[0m 有抗封鎖 & 抗封鎖目標網址 TAG，但上層已被指走，檔案請查看 $log/permissionerror_$now.txt 若無檔案代表皆正常 \033[33m==========\033[0m\n"
